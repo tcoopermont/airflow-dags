@@ -1,9 +1,10 @@
 import datetime as dt
 import pandas
-
+()
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.hooks.mysql_hook import MySqlHook 
 
 import count_rows
 
@@ -13,6 +14,12 @@ default_args = {
 	'concurrency': 1,
 	'retries': 0
 }
+
+def insert_counts():
+	mysql_hook = MySqlHook(mysql_conn_id="mysql_fruit", schema="fruit") # This connection must be set from the Connection view in Airflow UI
+	connection = mysql_hook.get_conn() # Gets the connection from PostgreHook
+	#connection.insert_rows("insert into fruit_count (apples) values (11)")
+	mysql_hook.run("insert into fruit_counts (apples) values (11)")
 
 with DAG('simple_http_test',
 	default_args=default_args,
@@ -24,6 +31,7 @@ with DAG('simple_http_test',
 	task_dl_figs = BashOperator(task_id='download_figs', 
 		bash_command="curl http://maps.tec8.net/figs/%s.txt -o /tmp/figs/%s.txt" % (date,date))
 
-	count_rows = PythonOperator(task_id="count_rows", python_callable=count_rows.main)
+	#count_rows = PythonOperator(task_id="count_rows", python_callable=count_rows.main)
+	count_rows = PythonOperator(task_id='count_rows', python_callable=insert_counts)
 	task_hello << task_dl_apples 
 	task_hello << task_dl_figs 
