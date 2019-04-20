@@ -11,10 +11,11 @@ default_args = {
 	'retries': 0
 }
 
-with DAG('simple_dag_backfill',
+with DAG('simple_http_test',
 	default_args=default_args,
-	schedule_interval='22 30 * * *') as dag:
-	date = {{execution_date}}
+	schedule_interval='30 22 * * *') as dag:
+	date = "{{ ds }}"
 	task_hello = BashOperator(task_id='hello', bash_command='echo "hello!"')
-	task_dl_apples = BashOperator(task_id='download_apples', bash_command="wget http://fruit.tec8.net/apples/%s" % (date))
+	task_dl_apples = BashOperator(task_id='download_apples', 
+		bash_command="curl http://maps.tec8.net/apples/%s.txt -o /tmp/apples/%s.txt" % (date,date))
 	task_hello >> task_dl_apples 
