@@ -1,8 +1,11 @@
 import datetime as dt
+import pandas
 
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
+
+import count_rows
 
 default_args = {
 	'owner': 'airflow',
@@ -20,5 +23,7 @@ with DAG('simple_http_test',
 		bash_command="curl http://maps.tec8.net/apples/%s.txt -o /tmp/apples/%s.txt" % (date,date))
 	task_dl_figs = BashOperator(task_id='download_figs', 
 		bash_command="curl http://maps.tec8.net/figs/%s.txt -o /tmp/figs/%s.txt" % (date,date))
+
+	count_rows = PythonOperator(task_id="count_rows", python_callable=count_rows.main)
 	task_hello << task_dl_apples 
 	task_hello << task_dl_figs 
