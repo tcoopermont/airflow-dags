@@ -18,4 +18,6 @@ with DAG('simple_http_test',
 	task_hello = BashOperator(task_id='hello', bash_command='echo "hello!"')
 	task_dl_apples = BashOperator(task_id='download_apples', 
 		bash_command="curl http://maps.tec8.net/apples/%s.txt -o /tmp/apples/%s.txt" % (date,date))
+	task_dl_figs = BashOperator(task_id='download_figs', 
+		bash_command="curl http://maps.tec8.net/figs/%s.txt -o /tmp/figs/%s.txt" % (date,date))
 	task_hello >> task_dl_apples 
